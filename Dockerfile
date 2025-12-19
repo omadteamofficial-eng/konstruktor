@@ -1,31 +1,37 @@
-# PHP 8.2 versiyasini Apache bilan birga ishlatamiz
+# PHP 8.2 Apache bazasida
 FROM php:8.2-apache
 
-# Tizim uchun zarur kutubxonalarni o'rnatish
+# Tizim paketlarini yangilash va faqat kerakli kutubxonalarni o'rnatish
 RUN apt-get update && apt-get install -y \
     libzip-dev \
+    libcurl4-openssl-dev \
+    pkg-config \
+    libssl-dev \
     zip \
     unzip \
-    && docker-php-ext-install zip curl json
+    && rm -rf /var/lib/apt/lists/*
 
-# Apache modulini yoqish (URL-larni chiroyli qilish uchun)
+# PHP modullarini o'rnatish
+# Eslatma: json va curl PHP 8.x da o'rnatilgan bo'ladi, faqat zip ni o'rnatamiz
+RUN docker-php-ext-install zip
+
+# Apache modullarini yoqish
 RUN a2enmod rewrite
 
-# Ishchi katalogni belgilash
+# Ishchi katalogni sozlash
 WORKDIR /var/www/html
 
-# Loyiha fayllarini konteynerga nusxalash
+# Fayllarni nusxalash
 COPY . .
 
-# Composer o'rnatish (agar kerak bo'lsa)
+# Composer o'rnatish
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Ma'lumotlar saqlanadigan papkaga ruxsat berish (Muhim!)
+# Ma'lumotlar papkasini yaratish va ruxsat berish
 RUN mkdir -p data/users && chmod -R 777 data
 
-# Apache portini sozlash (Render uchun)
+# Render portini sozlash
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
 
-# Apache serverini ishga tushirish
 CMD ["apache2-foreground"]
