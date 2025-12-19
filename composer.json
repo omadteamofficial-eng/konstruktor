@@ -1,1 +1,20 @@
 
+{
+    "name": "mybot/constructor-bot",
+    "description": "Professional bot constructor for Render",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "scripts": {
+        "start": "php -S 0.0.0.0:$PORT index.php"
+    }
+}
